@@ -1,0 +1,19 @@
+function suggestions(){
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Autocomplete");
+  var seed_kw = sheet.getRange("A2").getValue();
+  
+  var response = UrlFetchApp.fetch("http://suggestqueries.google.com/complete/search?&output=toolbar&hl=en&q="+seed_kw+"&gl=uk");
+  var xml = response.getContentText();  
+  var document = XmlService.parse(xml);
+  
+  var root = document.getRootElement();
+  var suggestions = root.getChildren('CompleteSuggestion');
+  
+  var suggest_list = [];
+  for(var x = 0 ;x < suggestions.length ; x++){
+    var suggestion = suggestions[x];
+    var data = suggestion.getChild('suggestion').getAttribute('data').getValue();
+    suggest_list.push([data]);
+  }
+  sheet.getRange(2,2,suggest_list.length,1).setValues(suggest_list)
+}
